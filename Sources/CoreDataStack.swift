@@ -104,6 +104,17 @@ public final class CoreDataStack {
                               callbackQueue: dispatch_queue_t? = nil,
                               callback: CoreDataStackSetupCallback) {
 
+        constructSQLiteStack(withModelName: modelName, inBundle: bundle, withPersistentStoreOptions: nil, withStoreURL: desiredStoreURL, callbackQueue: callbackQueue, callback: callback)
+    }
+    
+    public static func constructSQLiteStack(withModelName
+        modelName: String,
+        inBundle bundle: NSBundle = NSBundle.mainBundle(),
+                 withPersistentStoreOptions options: [NSObject : AnyObject]?,
+                                            withStoreURL desiredStoreURL: NSURL? = nil,
+                                                         callbackQueue: dispatch_queue_t? = nil,
+                                                         callback: CoreDataStackSetupCallback) {
+        
         let model = bundle.managedObjectModel(modelName: modelName)
         let storeFileURL = desiredStoreURL ?? NSURL(string: "\(modelName).sqlite", relativeToURL: documentsDirectory)!
         do {
@@ -112,12 +123,12 @@ public final class CoreDataStack {
             callback(.Failure(Error.UnableToCreateStoreAt(url: storeFileURL)))
             return
         }
-
+        
         let backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)
         let callbackQueue: dispatch_queue_t = callbackQueue ?? backgroundQueue
         NSPersistentStoreCoordinator.setupSQLiteBackedCoordinator(
             model,
-            storeFileURL: storeFileURL) { coordinatorResult in
+            storeFileURL: storeFileURL, options: options) { coordinatorResult in
                 switch coordinatorResult {
                 case .Success(let coordinator):
                     let stack = CoreDataStack(modelName : modelName,
