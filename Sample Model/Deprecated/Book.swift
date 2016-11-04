@@ -11,15 +11,15 @@ import CoreData
 import CoreDataStack
 
 @objc(Book)
-class Book: NSManagedObject, CoreDataModelable {
+class Book: NSManagedObject {
 
     @NSManaged var title: String?
     @NSManaged var authors: Set<Author>
     @NSManaged var publisher: NSManagedObject
 
     var firstInitial: String? {
-        willAccessValueForKey("title")
-        defer { didAccessValueForKey("title") }
+        willAccessValue(forKey: "title")
+        defer { didAccessValue(forKey: "title") }
         guard let title = title,
             let first = title.characters.first else {
                 return nil
@@ -28,8 +28,10 @@ class Book: NSManagedObject, CoreDataModelable {
 
         return initial
     }
+}
 
-    // MARK: - CoreDataModelable
-
-    static let entityName = "Book"
+extension Book: CoreDataModelable {
+    static var entityName: String {
+        return "Book"
+    }
 }

@@ -3,8 +3,10 @@
 //  CoreDataStack
 //
 //  Created by Robert Edwards on 11/18/15.
-//  Copyright © 2015 Big Nerd Ranch. All rights reserved.
+//  Copyright © 2015-2016 Big Nerd Ranch. All rights reserved.
 //
+
+// swiftlint:disable force_try
 
 import XCTest
 
@@ -17,18 +19,18 @@ class CoreDataModelableTests: TempDirectoryTestCase {
     override func setUp() {
         super.setUp()
 
-        weak var expectation = expectationWithDescription("callback")
-        CoreDataStack.constructSQLiteStack(withModelName: "Sample", inBundle: unitTestBundle, withStoreURL: tempStoreURL) { result in
+        weak var expectation = self.expectation(description: "callback")
+        CoreDataStack.constructSQLiteStack(modelName: "Sample", in: unitTestBundle, at: tempStoreURL) { result in
             switch result {
-            case .Success(let stack):
+            case .success(let stack):
                 self.stack = stack
-            case .Failure(let error):
+            case .failure(let error):
                 XCTFail("Error constructing stack: \(error)")
             }
             expectation?.fulfill()
         }
 
-        waitForExpectationsWithTimeout(10, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
 
     func testNewObject() {
@@ -103,14 +105,14 @@ class CoreDataModelableTests: TempDirectoryTestCase {
             XCTFail("Failed to fetch with error: \(error)")
         }
     }
-    
+
     func testCountInContext() {
         let totalBooks = 5
         for _ in 0..<totalBooks {
             let _ = Book(managedObjectContext: stack.mainQueueContext)
             try! stack.mainQueueContext.saveContextAndWait()
         }
-        
+
         do {
             let booksCount = try Book.countInContext(stack.mainQueueContext)
             XCTAssertEqual(booksCount, totalBooks)
@@ -118,25 +120,25 @@ class CoreDataModelableTests: TempDirectoryTestCase {
             failingOn(error)
         }
     }
-    
+
     func testCountInContextWithPredicate() {
         let iOSBook = Book(managedObjectContext: stack.mainQueueContext)
         iOSBook.title = "iOS Programming: The Big Nerd Ranch Guide"
-        
+
         let swiftBook = Book(managedObjectContext: stack.mainQueueContext)
         swiftBook.title = "Swift Programming: The Big Nerd Ranch Guide"
-        
+
         let warAndPeace = Book(managedObjectContext: stack.mainQueueContext)
         warAndPeace.title = "War and Peace"
-        
+
         do {
             try stack.mainQueueContext.save()
         } catch {
             XCTFail("Failed to save with error: \(error)")
         }
-        
+
         let predicate = NSPredicate(format: "title CONTAINS[cd] %@", "Big Nerd Ranch")
-        
+
         do {
             let matchingBooksCount = try Book.countInContext(stack.mainQueueContext, predicate: predicate)
             XCTAssertEqual(matchingBooksCount, 2)
@@ -152,7 +154,7 @@ class CoreDataModelableTests: TempDirectoryTestCase {
             let newBook = Book(managedObjectContext: stack.mainQueueContext)
             try! stack.mainQueueContext.saveContextAndWait()
 
-            if (counter % 2 == 0) {
+            if counter % 2 == 0 {
                 exceptionBooks.append(newBook)
             }
         }
