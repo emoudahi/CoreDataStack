@@ -111,7 +111,7 @@ public final class CoreDataStack {
     
     public static func constructSQLiteStack(withModelName modelName: String,
                                             in bundle: Bundle = Bundle.main,
-                                            withPersistentStoreOptions options: [NSObject : AnyObject]?,
+                                            withPersistentStoreOptions options: [AnyHashable : Any]?,
                                             at desiredStoreURL: URL? = nil,
                                             on callbackQueue: DispatchQueue? = nil,
                                             callback: @escaping SetupCallback) {
