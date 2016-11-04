@@ -101,17 +101,17 @@ public final class CoreDataStack {
                             This callback will be passed either an initialized `CoreDataStack` object or an `ErrorType` value.
      */
     public static func constructSQLiteStack(withModelName modelName: String,
-        																		inBundle bundle: NSBundle = NSBundle.mainBundle(),
-					                 									withStoreURL desiredStoreURL: NSURL? = nil,
-                              							callbackQueue	: dispatch_queue_t? = nil,
-                              							callback: CoreDataStackSetupCallback) {
+                                            in bundle: Bundle = Bundle.main,
+                                            at desiredStoreURL: URL? = nil,
+                                            on callbackQueue: DispatchQueue? = nil,
+                                            callback: @escaping SetupCallback) {
 
-        constructSQLiteStack(withModelName: modelName, inBundle: bundle, withPersistentStoreOptions: nil, withStoreURL: desiredStoreURL, callbackQueue: callbackQueue, callback: callback)
+        constructSQLiteStack(withModelName: modelName, in: bundle, withPersistentStoreOptions: nil, at: desiredStoreURL, on: callbackQueue, callback: callback)
     }
     
     public static func constructSQLiteStack(withModelName modelName: String,
-       	 																		in bundle: Bundle = Bundle.main,
-                 														withPersistentStoreOptions options: [NSObject : AnyObject]?,
+                                            in bundle: Bundle = Bundle.main,
+                                            withPersistentStoreOptions options: [NSObject : AnyObject]?,
                                             at desiredStoreURL: URL? = nil,
                                             on callbackQueue: DispatchQueue? = nil,
                                             callback: @escaping SetupCallback) {
@@ -317,20 +317,20 @@ public extension CoreDataStack {
                 }
 
                 // Setup a new stack
-                NSPersistentStoreCoordinator.setupSQLiteBackedCoordinator(mom, storeFileURL: storeURL) { result in
+                NSPersistentStoreCoordinator.setupSQLiteBackedCoordinator(mom, storeFileURL: storeURL, options: nil, completion: { (result) in
                     switch result {
                     case .success (let coordinator):
                         self.persistentStoreCoordinator = coordinator
                         callbackQueue.async {
                             callback(.success)
                         }
-
+                        
                     case .failure (let error):
                         callbackQueue.async {
                             callback(.failure(error))
                         }
                     }
-                }
+                })
             }
         }
     }
@@ -392,7 +392,7 @@ public extension CoreDataStack {
         case .sqLite(let storeURL):
             let backgroundQueue = DispatchQueue.global(qos: .background)
             let callbackQueue: DispatchQueue = callbackQueue ?? backgroundQueue
-            NSPersistentStoreCoordinator.setupSQLiteBackedCoordinator(managedObjectModel, storeFileURL: storeURL) { result in
+            NSPersistentStoreCoordinator.setupSQLiteBackedCoordinator(managedObjectModel, storeFileURL: storeURL, options: nil, completion: { (result) in
                 switch result {
                 case .success(let coordinator):
                     moc.persistentStoreCoordinator = coordinator
@@ -404,7 +404,7 @@ public extension CoreDataStack {
                         callback(.failure(error))
                     }
                 }
-            }
+            })
         }
     }
 }
